@@ -1,39 +1,43 @@
 <!DOCTYPE html>
 <html>
 <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Tableau JavaScript à 2 dimensions</title>
-        <style>
-            table {
-                border-collapse: collapse;
-                width: 50%;
-                margin: 20px auto;
-            }
-            th, td {
-                border: 1px solid black;
-                padding: 8px;
-                text-align: center;
-                font-size: 24px;
-            }
-            .pion-blanc {
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau JavaScript à 2 dimensions</title>
+    <style>
+        /* Your existing CSS styles here */
+        table {
+            border-collapse: collapse;
+            margin: 20px auto;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 0;
+            text-align: center;
+            font-size: 24px;
+            width: 50px; /* Set a fixed width for cells */
+            height: 50px; /* Set a fixed height for cells */
+        }
+        .coordinate-label {
+            font-size: 12px;
+        }
+        .pion-blanc {
                 background-color: blue;
                 border-radius: 50%;
-                height: 30px;
-                width: 30px;
+                height: 15px;
+                width: 15px;
             }
             .pion-noir {
                 background-color: black;
                 border-radius: 50%;
-                height: 30px;
-                width: 30px;
-            }
-        </style>
+                height: 15px;
+                width: 15px;}
+    </style>
 
 <script type="text/javascript">
 'use strict';
 var Engine = new Worker("mtdf(10)_worker.js");
-var Engine2 = new Worker("mtdf_worker.js");
+// var Engine2 = new Worker("mtdf_worker.js");
 
 var GameBoard = [
     //0 1  2  3  4  5  6  7  8  9  0  1  2  3  4      
@@ -44,7 +48,7 @@ var GameBoard = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //4
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //5
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //6
-    [0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0], //7
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //7
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //8
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //9
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //10
@@ -59,6 +63,9 @@ var GameBoard = [
 Engine.onmessage = function(e) {
     console.log("salut:", e.data);
     console.log(e.data.bestmove);
+    if (e.data.bestmove.score == 100000) {
+        alert("You lost, AI WINS !");
+    }
     console.log(`Cache Hits: ${e.data.CacheHits}`)
     console.log(`Cache Cutoffs: ${e.data.CacheCutoffs}`)
     console.log(`Cache Puts: ${e.data.CachePuts}`)
@@ -69,56 +76,147 @@ Engine.onmessage = function(e) {
     console.log(e.data.firstMoves)
     GameBoard[e.data.bestmove.i][e.data.bestmove.j] = 1;
     afficherTableau()
-    Engine2.postMessage([GameBoard,-1,1000]);
+    if (checkForWin(GameBoard, e.data.bestmove.i, e.data.bestmove.j)) {
+        document.getElementById('Title').innerText = 'AI wins!';
+        disableBoard();
+        return;
     }
-var MaximumTimeForMove=1000;
-Engine.postMessage([GameBoard,1,MaximumTimeForMove]);
+    // Engine2.postMessage([GameBoard,-1,1000]); // Needed if two ai are playing against each other
+    }
+// Engine.postMessage([GameBoard,1,MaximumTimeForMove]);
+
+function checkForWin(Board, x, y) {
+    const directions = [
+        [0, 1],   // Horizontal
+        [1, 0],   // Vertical
+        [1, 1],   // Diagonal (\)
+        [1, -1]   // Diagonal (/)
+    ];
+
+    const currentPlayer = Board[x][y];
+    for (const [dx, dy] of directions) {
+        let count = 1;
+        let i = x + dx;
+        let j = y + dy;
+        while (i >= 0 && i < Board.length && j >= 0 && j < Board[0].length && Board[i][j] === currentPlayer) {
+            count++;
+            i += dx;
+            j += dy;
+        }
+        i = x - dx;
+        j = y - dy;
+        while (i >= 0 && i < Board.length && j >= 0 && j < Board[0].length && Board[i][j] === currentPlayer) {
+            count++;
+            i -= dx;
+            j -= dy;
+        }
+        if (count >= 5) {
+            return true;
+        }
+    }
+
+    return false;
+}
 
 
-Engine2.onmessage = function(e) {
-    console.log("salut:", e.data);
-    console.log(e.data.bestmove);
-    console.log(`Cache Hits: ${e.data.CacheHits}`)
-    console.log(`Cache Cutoffs: ${e.data.CacheCutoffs}`)
-    console.log(`Cache Puts: ${e.data.CachePuts}`)
-    console.log(`function calls ${e.data.fc}`)
-    console.log(`Call to iterative mtdf took ${e.data.time} seconds.`)
-    console.log(`StateCacheHits: ${e.data.StateCacheHits}`)
-    console.log(`StateCachePuts: ${e.data.StateCachePuts}`)
-    console.log(e.data.firstMoves)
-    GameBoard[e.data.bestmove.i][e.data.bestmove.j] = -1;
+function handleUserMove() {
+    var i = parseInt(document.getElementById("input-i").value);
+    var j = parseInt(document.getElementById("input-j").value);
+
+    GameBoard[i][j] = -1;
     afficherTableau();
-    console.log(GameBoard);
-    Engine.postMessage([GameBoard,1,1000]);
+
+    if (checkForWin(GameBoard, i, j)) {
+        document.getElementById('Title').innerText = 'Player wins!';
+        disableBoard();
+        return;
     }
-var MaximumTimeForMove=1000;
+
+    Engine.postMessage([GameBoard, 1, 1000]);
+}
+
+        function handleEngineMove() {
+            Engine.postMessage([GameBoard, 1, 1000]);
+        }
+
+        function disableBoard() {
+    var cells = document.getElementsByTagName('td');
+    for (var i = 0; i < cells.length; i++) {
+        cells[i].removeEventListener('click', handleUserMove);
+    }
+}
+function restartGame() {
+  GameBoard = [
+    //0 1  2  3  4  5  6  7  8  9  0  1  2  3  4      
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //0
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //1
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //2
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //3
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //4
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //5
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //6
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //7
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //8
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //9
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //10
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //11
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //12
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //13
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //14
+]
+afficherTableau();
+            
+            }
 </script>              
 </head>
 <body>
-    <table id="tableau"></table>
+  <h1 id="Title">Gomoku AI</h1>
+  <button onclick="handleEngineMove()">Engine Starts move</button>
+  <button onclick="restartGame()">Restart Game</button>
+  <table id="tableau"></table>
     <script>
-    
         // Récupérer l'élément table depuis le DOM
         var tableElement = document.getElementById('tableau');
 
-        // Fonction pour afficher le tableau
-        function afficherTableau() {
-            tableElement.innerHTML = '';
-    
-            for (var i = 0; i < GameBoard.length; i++) {
-                var row = tableElement.insertRow();
-                for (var j = 0; j < GameBoard[i].length; j++) {
-                    var cell = row.insertCell();
-                    var valeur = GameBoard[i][j];
-                    if (valeur == 1) {
-                        cell.innerHTML = '<div class="pion-blanc"></div>';
-                    } else if (valeur == -1){
-                        cell.innerHTML = '<div class="pion-noir"></div>';
-                    }
+function afficherTableau() {
+    tableElement.innerHTML = '';
+
+    for (var i = -1; i < GameBoard.length; i++) {
+        var row = tableElement.insertRow();
+
+        for (var j = -1; j < GameBoard[0].length; j++) {
+            var cell = row.insertCell();
+
+            if (i === -1 && j === -1) {
+                cell.innerHTML = '';
+            } else if (i === -1) {
+                cell.innerHTML = `<div class="coordinate-label">${j}</div>`;
+            } else if (j === -1) {
+                cell.innerHTML = `<div class="coordinate-label">${i}</div>`;
+            } else {
+                var valeur = GameBoard[i][j];
+                if (valeur == 1) {
+                    cell.innerHTML = '<div class="pion-blanc"></div>';
+                } else if (valeur == -1) {
+                    cell.innerHTML = '<div class="pion-noir"></div>';
+                } else {
+                    // Add event listener for click event
+                    cell.addEventListener('click', function() {
+                        var i = this.parentNode.rowIndex - 1;
+                        var j = this.cellIndex - 1;
+
+                        if (GameBoard[i][j] === 0) {
+                            GameBoard[i][j] = -1;
+                            afficherTableau();
+                            Engine.postMessage([GameBoard, 1, 1000]);
+                        }
+                    });
                 }
             }
         }
-    
+    }
+}
+
         // Initialiser l'affichage
         afficherTableau();
     </script>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  .board {
+    display: grid;
+    grid-template-columns: repeat(15, 30px); /* Adjust the size of cells as needed */
+    grid-gap: 2px;
+  }
+
+  .cell {
+    width: 30px; /* Adjust the size of cells as needed */
+    height: 30px; /* Adjust the size of cells as needed */
+    border: 1px solid #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<h1>Gomoku Game</h1>
+
+<div class="board" id="board"></div>
+
+<script type="text/javascript">
+  const boardElement = document.getElementById('board');
+  let gameBoard = [...Array(15)].map(() => Array(15).fill(0));
+
+  function renderBoard() {
+    boardElement.innerHTML = '';
+    for (let i = 0; i < 15; i++) {
+      for (let j = 0; j < 15; j++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.dataset.row = i;
+        cell.dataset.col = j;
+        cell.innerText = gameBoard[i][j] === 1 ? 'X' : (gameBoard[i][j] === -1 ? 'O' : '');
+        boardElement.appendChild(cell);
+      }
+    }
+  }
+
+  function makeMove(row, col) {
+    if (gameBoard[row][col] === 0) {
+      gameBoard[row][col] = 1; // Assuming player is always X
+      renderBoard();
+      Engine.postMessage([gameBoard, -1, MaximumTimeForMove]); // Send the updated board to the engine
+    }
+  }
+
+  boardElement.addEventListener('click', (e) => {
+    const row = e.target.dataset.row;
+    const col = e.target.dataset.col;
+    if (row !== undefined && col !== undefined) {
+      makeMove(parseInt(row), parseInt(col));
+    }
+  });
+
+  Engine.onmessage = function(e) {
+    const bestMove = e.data.bestmove;
+    if (bestMove) {
+      gameBoard[bestMove.i][bestMove.j] = -1; // Assuming AI is always O
+      renderBoard();
+    }
+  }
+</script>
+
+</body>
+</html>
