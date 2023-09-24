@@ -503,9 +503,9 @@ function TIMEOUT() {
     }
 }
 
-function iterative_mtdf(Board) {
+function iterative_mtdf(Board, Turn) {
     const restrictions = Get_restrictions(Board)
-    let guess = evaluate_state(Board, 1, hash(GameBoard), [0, 0, Rows - 1, Columns - 1])
+    let guess = evaluate_state(Board, Turn, hash(GameBoard), [0, 0, Rows - 1, Columns - 1])
     console.log(`Guess for best score: ${guess}`)
     bestmoves = BoardGenerator(restrictions, Board, 1);
     let move;
@@ -635,10 +635,10 @@ let StateCachePuts = 0;
 let StateCacheHits = 0
 let startTime;
 
-function search() {
+function search(Turn) {
     startTime = Date.now();
     const t0 = performance.now();
-    const bestmove = iterative_mtdf(GameBoard)
+    const bestmove = iterative_mtdf(GameBoard, Turn)
     const t1 = performance.now();
     Cache.clear()
     StateCache.clear()
@@ -656,7 +656,7 @@ function search() {
 }
 onmessage = function(e) {
     const Board = e.data[0]
-    // const Turn = e.data[1]
+    const Turn = e.data[1]
     MaximumTimeForMove = e.data[2]
     console.log(e.data)
     if (Board) {
@@ -693,7 +693,7 @@ onmessage = function(e) {
         StateCachePuts = 0;
         fc = 0;
         Table_init();
-        const results = search();
+        const results = search(Turn);
         postMessage(results)
     }
 }
