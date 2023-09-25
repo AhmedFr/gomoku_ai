@@ -1,41 +1,43 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tableau JavaScript à 2 dimensions</title>
+<!DOCTYPE html >
+    <html >
+    <head >
+    <meta charset = "UTF-8" >
+    <meta name = "viewport"
+content = "width=device-width, initial-scale=1.0" >
+    <title > Tableau JavaScript à 2 dimensions </title> 
     <style>
-        /* Your existing CSS styles here */
-        table {
-            border-collapse: collapse;
-            margin: 20px auto;
-        }
-        th, td {
-            border: 1px solid black;
-            padding: 0;
-            text-align: center;
-            font-size: 24px;
-            width: 50px; /* Set a fixed width for cells */
-            height: 50px; /* Set a fixed height for cells */
-        }
-        .coordinate-label {
-            font-size: 12px;
-        }
-        .pion-blanc {
-                background-color: blue;
-                border-radius: 50%;
-                height: 15px;
-                width: 15px;
-            }
-            .pion-noir {
-                background-color: black;
-                border-radius: 50%;
-                height: 15px;
-                width: 15px;}
-    </style>
+    /* Your existing CSS styles here */
+    table {
+        border-collapse: collapse;
+        margin: 20 px auto;
+    }
+th, td {
+    border: 1 px solid black;
+    padding: 0;
+    text-align: center;
+    align-items: center;
+    font-size: 24 px;
+    width: 50 px; /* Set a fixed width for cells */
+    height: 50 px; /* Set a fixed height for cells */
+}
+.coordinate-label {
+        font-size: 12 px;
+    }
+    .pion-blanc {
+        background-color: blue;
+        border-radius: 50% ;
+        height: 15 px;
+        width: 15 px;
+    }
+    .pion-noir {
+        background-color: black;
+        border-radius: 50% ;
+        height: 15 px;
+        width: 15 px;
+    } </style>
 
-<script type="text/javascript">
-'use strict';
+    <script type = "text/javascript" >
+    'use strict';
 var Engine = new Worker("mtdf(10)_worker.js");
 // var Engine2 = new Worker("mtdf_worker.js");
 
@@ -59,7 +61,7 @@ var GameBoard = [
 ]
 
 
- 
+
 Engine.onmessage = function(e) {
     console.log("salut:", e.data);
     console.log(e.data.bestmove);
@@ -82,15 +84,15 @@ Engine.onmessage = function(e) {
         return;
     }
     // Engine2.postMessage([GameBoard,-1,1000]); // Needed if two ai are playing against each other
-    }
+}
 // Engine.postMessage([GameBoard,1,MaximumTimeForMove]);
 
 function checkForWin(Board, x, y) {
     const directions = [
-        [0, 1],   // Horizontal
-        [1, 0],   // Vertical
-        [1, 1],   // Diagonal (\)
-        [1, -1]   // Diagonal (/)
+        [0, 1], // Horizontal
+        [1, 0], // Vertical
+        [1, 1], // Diagonal (\)
+        [1, -1] // Diagonal (/)
     ];
 
     const currentPlayer = Board[x][y];
@@ -98,14 +100,14 @@ function checkForWin(Board, x, y) {
         let count = 1;
         let i = x + dx;
         let j = y + dy;
-        while (i >= 0 && i < Board.length && j >= 0 && j < Board[0].length && Board[i][j] === currentPlayer) {
+        while (i >= 0 && i <Board.length && j >= 0 && j <Board[0].length && Board[i][j] === currentPlayer) {
             count++;
             i += dx;
             j += dy;
         }
-        i = x - dx;
-        j = y - dy;
-        while (i >= 0 && i < Board.length && j >= 0 && j < Board[0].length && Board[i][j] === currentPlayer) {
+        i = x-dx;
+        j = y-dy;
+        while (i >= 0 && i <Board.length && j >= 0 && j <Board[0].length && Board[i][j] === currentPlayer) {
             count++;
             i -= dx;
             j -= dy;
@@ -135,56 +137,57 @@ function handleUserMove() {
     Engine.postMessage([GameBoard, 1, 1000]);
 }
 
-        function handleEngineMove() {
-            Engine.postMessage([GameBoard, 1, 1000]);
-        }
+function handleEngineMove() {
+    GameBoard[7][7] = 1;
+    afficherTableau();
+}
 
-        function disableBoard() {
+function disableBoard() {
     var cells = document.getElementsByTagName('td');
-    for (var i = 0; i < cells.length; i++) {
+    for (var i = 0; i <cells.length; i++) {
         cells[i].removeEventListener('click', handleUserMove);
     }
 }
+
 function restartGame() {
-  GameBoard = [
-    //0 1  2  3  4  5  6  7  8  9  0  1  2  3  4      
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //0
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //1
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //2
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //3
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //4
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //5
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //6
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //7
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //8
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //9
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //10
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //11
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //12
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //13
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //14
-]
-afficherTableau();
-            
-            }
-</script>              
-</head>
+    GameBoard = [
+        //0 1  2  3  4  5  6  7  8  9  0  1  2  3  4      
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //0
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //1
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //2
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //3
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //4
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //5
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //6
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //7
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //8
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //9
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //10
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //11
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //12
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //13
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], //14
+    ]
+    afficherTableau();
+
+} </script>
+</head > 
 <body>
-  <h1 id="Title">Gomoku AI</h1>
-  <button onclick="handleEngineMove()">Engine Starts move</button>
-  <button onclick="restartGame()">Restart Game</button>
-  <table id="tableau"></table>
-    <script>
-        // Récupérer l'élément table depuis le DOM
-        var tableElement = document.getElementById('tableau');
+    <h1 id = "Title" > Gomoku AI </h1>
+     <button onclick = "handleEngineMove()" > Engine Starts move </button>
+     <button onclick = "restartGame()" > Restart Game </button> 
+     <table id = "tableau" > </table> 
+  <script >
+    // Récupérer l'élément table depuis le DOM
+    var tableElement = document.getElementById('tableau');
 
 function afficherTableau() {
     tableElement.innerHTML = '';
 
-    for (var i = -1; i < GameBoard.length; i++) {
+    for (var i = -1; i <GameBoard.length; i++) {
         var row = tableElement.insertRow();
 
-        for (var j = -1; j < GameBoard[0].length; j++) {
+        for (var j = -1; j <GameBoard[0].length; j++) {
             var cell = row.insertCell();
 
             if (i === -1 && j === -1) {
@@ -202,8 +205,8 @@ function afficherTableau() {
                 } else {
                     // Add event listener for click event
                     cell.addEventListener('click', function() {
-                        var i = this.parentNode.rowIndex - 1;
-                        var j = this.cellIndex - 1;
+                        var i = this.parentNode.rowIndex-1;
+                        var j = this.cellIndex-1;
 
                         if (GameBoard[i][j] === 0) {
                             GameBoard[i][j] = -1;
@@ -217,8 +220,8 @@ function afficherTableau() {
     }
 }
 
-        // Initialiser l'affichage
-        afficherTableau();
-    </script>
-</body>
+// Initialiser l'affichage
+afficherTableau(); 
+</script> 
+</body > 
 </html>
