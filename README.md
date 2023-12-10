@@ -1,13 +1,17 @@
 # gomoku_ai
-https://qwertyforce.dev/gomoku_ai.pdf [RU]<br>
-https://habr.com/ru/post/541564/ [RU]<br>
-Experiments with variations of minimax algorithm, MTD(f), MCTS in Gomoku  <br>
-mtdf(10) - dangerous pruning, can lead to unexpected loss <br>
-Main ai agent is in mtdf(10)_worker.js. You can play against ai here https://gomoku.qwertyforce.dev/game_offline
+![Board](./.github/assets/images/board.png)
 
-You can see this error while opening html files in Chrome <br>
-![Alt text](./screenshots/1.JPG) <br>
+## How to install & use
+1. Clone repository `git clone https://github.com/MaximePremont/gomoku_ai`
+2. Use node version 16 ( you can use `nvm use` is you are using NVM )
+3. Install dependencies `npm i`
+4. Start local web server `npx http-server`
+5. Open [http://127.0.0.1:8080/play.html](http://127.0.0.1:8080/play.html)
+6. Play !
+
+
+**You can see this error while opening html files in Chrome**
+![Error](./.github/assets/images/error.jpg)
 Chrome doesn't let you load web workers from a local file.
 https://stackoverflow.com/questions/21408510/chrome-cant-load-web-worker
-https://stackoverflow.com/questions/17679399/does-disable-web-security-work-in-chrome-anymore/36939693 <br>
-c++ version - https://github.com/qwertyforce/gomoku_ai_c
+https://stackoverflow.com/questions/17679399/does-disable-web-security-work-in-chrome-anymore/36939693
